@@ -118,7 +118,7 @@ if df is not None:
         date_limite = date_max - pd.Timedelta(days=30)
         groupe_recent = groupe_propre[groupe_propre['Date'] >= date_limite].copy()
         
-        if len(groupe_recent) < 3:
+       if len(groupe_recent) < 3:
             resultats.append({
                 'Électro.': nom,
                 'CE Actuel (%)': "N/A",
@@ -127,6 +127,37 @@ if df is not None:
                 'Membrane': "Pas assez de données",
                 'Revêtement': "Pas assez de données"
             })
+            continue
+            
+        # 2. CALCULS DES PENTES UNIQUEMENT SUR LA FENÊTRE RÉCENTE
+        jours_ecoules = (groupe_recent['Date'] - groupe_recent['Date'].min()).dt.days
+            
+        pente_ce_jour, _ = np.polyfit(jours_ecoules, groupe_recent['CE_Calcule'], 1)
+        pente_r_jour, _ = np.polyfit(jours_ecoules, groupe_recent['Resistance'], 1)
+        
+        pente_ce_mois = pente_ce_jour * 30
+        pente_r_mois = pente_r_jour * 30
+        
+        ce_moyen_recent = groupe_recent['CE_Calcule'].tail(5).mean() 
+        
+        # 3. DIAGNOSTICS
+        if ce_moyen_recent < SEUIL_CE_CRITIQUE:
+            diag_mem = "🔴 FIN DE VIE (<90%)"
+        elif pente_ce_mois < MAX_PERTE_CE_PAR_MOIS:
+            diag_mem = "⚠️ CHUTE RAPIDE"
+        else:
+            diag_mem = "✅ Normal"
+            
+        diag_rev = "⚠️ ACCÉLÉRÉ" if pente_r_mois > MAX_HAUSSE_R_PAR_MOIS else "✅ Normal"
+
+        resultats.append({
+            'Électro.': nom,
+            'CE Actuel (%)': f"{ce_moyen_recent:.1f}",
+            'Δ CE/mois': f"{pente_ce_mois:+.3f} %",
+            'Δ R/mois': f"{pente_r_mois:+.4f} Ω",
+            'Membrane': diag_mem,
+            'Revêtement': diag_rev
+        })
             continue
             
         # 2. CALCULS DES PENTES UNIQUEMENT SUR LA FENÊTRE RÉCENTE
