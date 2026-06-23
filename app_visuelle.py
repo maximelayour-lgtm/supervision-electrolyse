@@ -58,7 +58,8 @@ exemple_choisi = st.sidebar.selectbox(
      "02 - Milieu de vie",
      "03 - Fin de vie",
      "04 - Panne soudaine",
-     "05 - Année complète avec arrêts")
+     "05 - Année complète avec arrêts",
+     "06 - test alerte HCl")
 )
 
 st.sidebar.markdown("---")
@@ -78,6 +79,7 @@ elif exemple_choisi != "Aucun":
         "03 - Fin de vie": "03_fin_vie.csv",
         "04 - Panne soudaine": "04_panne_soudaine.csv",
         "05 - Année complète avec arrêts": "05_annee_complete_incidents.csv"
+        "06 - test alerte HCl": "06_test_alerte_hcl.csv"
     }
     
     fichier_a_charger = fichiers_exemples[exemple_choisi]
