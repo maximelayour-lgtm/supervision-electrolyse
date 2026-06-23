@@ -54,9 +54,9 @@ st.sidebar.markdown("**OU**")
 exemple_choisi = st.sidebar.selectbox(
     "2. Utilisez un fichier d'exemple :",
     ("Aucun",
-     "01 - Début de vie (CE ~96%)",
-     "02 - Milieu de vie (CE ~93%)",
-     "03 - Fin de vie (CE ~87%)",
+     "01 - Début de vie",
+     "02 - Milieu de vie",
+     "03 - Fin de vie",
      "04 - Panne soudaine",
      "05 - Année complète avec arrêts")
 )
@@ -73,9 +73,9 @@ if fichier_upload is not None:
 
 elif exemple_choisi != "Aucun":
     fichiers_exemples = {
-        "01 - Début de vie (CE ~96%)": "01_debut_vie.csv",
-        "02 - Milieu de vie (CE ~93%)": "02_milieu_vie.csv",
-        "03 - Fin de vie (CE ~87%)": "03_fin_vie.csv",
+        "01 - Début de vie": "01_debut_vie.csv",
+        "02 - Milieu de vie": "02_milieu_vie.csv",
+        "03 - Fin de vie": "03_fin_vie.csv",
         "04 - Panne soudaine": "04_panne_soudaine.csv",
         "05 - Année complète avec arrêts": "05_annee_complete_incidents.csv"
     }
@@ -162,13 +162,13 @@ if df is not None:
         # DIAGNOSTICS FINAUX
         # ==========================================
         if ce_moyen_recent < SEUIL_CE_CRITIQUE:
-            diag_mem = "🔴 FIN DE VIE (<90%)"
+            diag_mem = "🔴 FIN DE VIE (<93%)"
         elif pente_ce_mois < MAX_PERTE_CE_PAR_MOIS:
-            diag_mem = "⚠️ CHUTE RAPIDE"
+            diag_mem = "⚠️ CHUTE RENDEMENT RAPIDE"
         else:
             diag_mem = "✅ Normal"
             
-        diag_rev = "⚠️ ACCÉLÉRÉ" if pente_r_mois > MAX_HAUSSE_R_PAR_MOIS else "✅ Normal"
+        diag_rev = "⚠️ USURE CADRES" if pente_r_mois > MAX_HAUSSE_R_PAR_MOIS else "✅ Normal"
 
         resultats.append({
             'Électro.': nom,
@@ -187,7 +187,7 @@ if df is not None:
     col_titre, col_filtre = st.columns([2, 1])
     
     with col_titre:
-        st.subheader("📋 Bilan de Santé (30 derniers jours)")
+        st.subheader("📋 Bilan électrolyseurs")
         
     with col_filtre:
         liste_electro = sorted(df['Electrolyseur'].unique())
