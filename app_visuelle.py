@@ -16,7 +16,7 @@ RENDEMENT_ANO = 0.98
 U0_APPROX = 310.0
 
 MAX_PERTE_CE_PAR_MOIS = -0.15
-MAX_HAUSSE_R_PAR_MOIS = 0.0015
+MAX_HAUSSE_R_PAR_MOIS = 0.015
 SEUIL_CE_CRITIQUE = 93.0
 
 st.set_page_config(page_title="Suivi Électrolyse", layout="wide")
