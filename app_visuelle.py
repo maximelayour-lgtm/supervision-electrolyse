@@ -180,28 +180,60 @@ if df is not None:
             'Injection HCl': diag_coherence
         })
 
-    # ==========================================
+ # ==========================================
     # AFFICHAGE DE L'INTERFACE
     # ==========================================
-    st.subheader("📋 Bilan de Santé (Sur les 30 derniers jours de production)")
+    # 1. Mise en page du haut : Titre et Filtre côte à côte
+    col_titre, col_filtre = st.columns([2, 1])
+    
+    with col_titre:
+        st.subheader("📋 Bilan de Santé (30 derniers jours)")
+        
+    with col_filtre:
+        liste_electro = sorted(df['Electrolyseur'].unique())
+        selection_electro = st.multiselect("🔍 Filtrer les électrolyseurs :", liste_electro, default=liste_electro)
+
+    # Affichage du tableau filtré
     df_res = pd.DataFrame(resultats)
-    st.dataframe(df_res, use_container_width=True)
+    df_res_filtre = df_res[df_res['Électro.'].isin(selection_electro)]
+    st.dataframe(df_res_filtre, use_container_width=True)
     
     st.markdown("---")
     
-    st.subheader("📈 Visualisation des Performances (Historique Complet)")
+    # 2. Mise en page du bas : Titre des graphiques et Curseur de lissage
+    col_graphe_titre, col_lissage = st.columns([2, 1])
+    
+    with col_graphe_titre:
+        st.subheader("📈 Visualisation des Performances")
+        
+    with col_lissage:
+        lissage = st.slider("📏 Lissage des courbes (jours)", min_value=1, max_value=14, value=7, help="1 = Données brutes, 7 = Tendance lissée sur une semaine")
+
+    # --- PRÉPARATION DES DONNÉES GRAPHIQUES (Filtrage + Lissage) ---
+    df_plot = df[df['Electrolyseur'].isin(selection_electro)].copy()
+    df_plot = df_plot.sort_values('Date')
+    
+    if lissage > 1:
+        # Application d'une moyenne mobile pour lisser les courbes
+        df_plot['CE_Affiche'] = df_plot.groupby('Electrolyseur')['CE_Calcule'].transform(lambda x: x.rolling(lissage, min_periods=1).mean())
+        df_plot['R_Affiche'] = df_plot.groupby('Electrolyseur')['Resistance'].transform(lambda x: x.rolling(lissage, min_periods=1).mean())
+    else:
+        # Lissage à 1 = On affiche les données brutes
+        df_plot['CE_Affiche'] = df_plot['CE_Calcule']
+        df_plot['R_Affiche'] = df_plot['Resistance']
+        
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("**Évolution du Rendement Cathodique (CE)**")
-        fig_ce = px.line(df, x='Date', y='CE_Calcule', color='Electrolyseur')
+        fig_ce = px.line(df_plot, x='Date', y='CE_Affiche', color='Electrolyseur')
         fig_ce.add_hline(y=SEUIL_CE_CRITIQUE, line_dash="dash", line_color="red", annotation_text="Seuil Critique")
         fig_ce.update_traces(connectgaps=False)
         st.plotly_chart(fig_ce, use_container_width=True)
         
     with col2:
         st.markdown("**Évolution de la Résistance (État des Revêtements)**")
-        fig_r = px.line(df, x='Date', y='Resistance', color='Electrolyseur')
+        fig_r = px.line(df_plot, x='Date', y='R_Affiche', color='Electrolyseur')
         fig_r.update_traces(connectgaps=False)
         st.plotly_chart(fig_r, use_container_width=True)
 
