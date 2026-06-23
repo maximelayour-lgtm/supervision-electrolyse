@@ -6,18 +6,18 @@ import plotly.express as px
 # ==========================================
 # CONSTANTES DU PROCÉDÉ
 # ==========================================
-F = 96485                
-M_HCL = 36.46            
-M_CL2 = 71.0             
-N_CELLULES = 108         
-CONC_HCL = 0.35          
-DENSITE_HCL = 1.17       
-RENDEMENT_ANO = 0.98     
-U0_APPROX = 310.0        
+F = 96485
+M_HCL = 36.46
+M_CL2 = 71.0
+N_CELLULES = 108
+CONC_HCL = 0.35
+DENSITE_HCL = 1.17
+RENDEMENT_ANO = 0.98
+U0_APPROX = 310.0
 
-MAX_PERTE_CE_PAR_MOIS = -0.15 
+MAX_PERTE_CE_PAR_MOIS = -0.15
 MAX_HAUSSE_R_PAR_MOIS = 0.005
-SEUIL_CE_CRITIQUE = 90.0 
+SEUIL_CE_CRITIQUE = 90.0
 
 st.set_page_config(page_title="Suivi Électrolyse", layout="wide")
 st.title("📊 Tableau de Bord : Suivi des Électrolyseurs")
@@ -78,7 +78,7 @@ elif exemple_choisi != "Aucun":
         "02 - Milieu de vie": "02_milieu_vie.csv",
         "03 - Fin de vie": "03_fin_vie.csv",
         "04 - Panne soudaine": "04_panne_soudaine.csv",
-        "05 - Année complète avec arrêts": "05_annee_complete_incidents.csv"
+        "05 - Année complète avec arrêts": "05_annee_complete_incidents.csv", # <-- VIRGULE AJOUTÉE ICI
         "06 - test alerte HCl": "06_test_alerte_hcl.csv"
     }
     
@@ -100,6 +100,8 @@ if df is not None:
     df['Resistance'] = np.where(df['I_kA'] > 0, (df['U_V'] - U0_APPROX) / df['I_kA'], np.nan)
     
     resultats = []
+    
+    # DÉBUT DE LA BOUCLE D'ANALYSE
     for nom, groupe in df.groupby('Electrolyseur'):
         groupe = groupe.sort_values('Date')
         
@@ -181,9 +183,10 @@ if df is not None:
             'Revêtement': diag_rev,
             'Injection HCl': diag_coherence
         })
+    # FIN DE LA BOUCLE D'ANALYSE
 
- # ==========================================
-    # AFFICHAGE DE L'INTERFACE
+    # ==========================================
+    # AFFICHAGE DE L'INTERFACE (Désormais en dehors de la boucle for)
     # ==========================================
     # 1. Mise en page du haut : Titre et Filtre côte à côte
     col_titre, col_filtre = st.columns([2, 1])
